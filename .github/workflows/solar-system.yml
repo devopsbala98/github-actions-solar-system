@@ -29,7 +29,8 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          # Using glob pattern to avoid "file not found" hashing errors
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Dependencies
         run: npm install
@@ -52,7 +53,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Node.js 18
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4 # Updated to v4 for consistency
         with:
           node-version: 18
 
@@ -60,7 +61,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Dependencies
         run: npm install
