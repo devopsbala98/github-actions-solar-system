@@ -12,7 +12,7 @@ env:
   MONGO_USERNAME: superuser
   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
-jobs:
+jobs: # Define this ONLY ONCE
   unit-testing:
     name: Unit Testing
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS
+      - name: Setup NodeJS Version
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -28,28 +28,31 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Run Unit Tests
+      - name: Unit Testing
         run: npm test
 
-      - name: Archive Test Results
-        if: always() 
+      - name: Archive Test Result
+        if: always() # Runs even if tests fail
         uses: actions/upload-artifact@v4
         with:
           name: Mocha-Test-Result
           path: test-results.xml
-
   code-coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
-    # Optional: needs: unit-testing (uncomment if coverage depends on tests passing)
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS
-        uses: actions/setup-node@v4
+      - name: Setup Node.js 18
+        uses: actions/setup-node@v3
         with:
-          node-version: 20
+          node-version: 18
+      - name: Cache NPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: '${{ runner.os }}-node-modules-${{ hashFiles(''package-lock.json'') }}'
 
       - name: Install Dependencies
         run: npm install
@@ -58,7 +61,7 @@ jobs:
         run: npm run coverage
 
       - name: Archive Coverage Report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v3
         with:
           name: Code-Coverage-Result
           path: coverage
