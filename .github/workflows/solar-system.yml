@@ -12,7 +12,7 @@ env:
   MONGO_USERNAME: superuser
   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
-jobs: # Define this ONLY ONCE
+jobs:
   unit-testing:
     name: Unit Testing
     runs-on: ubuntu-latest
@@ -25,6 +25,12 @@ jobs: # Define this ONLY ONCE
         with:
           node-version: 20
 
+      - name: Cache NPM dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
       - name: Install Dependencies
         run: npm install
 
@@ -32,11 +38,12 @@ jobs: # Define this ONLY ONCE
         run: npm test
 
       - name: Archive Test Result
-        if: always() # Runs even if tests fail
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Mocha-Test-Result
           path: test-results.xml
+
   code-coverage:
     name: Code Coverage
     runs-on: ubuntu-latest
@@ -48,11 +55,12 @@ jobs: # Define this ONLY ONCE
         uses: actions/setup-node@v3
         with:
           node-version: 18
+
       - name: Cache NPM dependencies
         uses: actions/cache@v4
         with:
           path: ~/.npm
-          key: '${{ runner.os }}-node-modules-${{ hashFiles(''package-lock.json'') }}'
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
 
       - name: Install Dependencies
         run: npm install
