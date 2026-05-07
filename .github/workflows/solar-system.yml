@@ -12,7 +12,7 @@ env:
   MONGO_USERNAME: superuser
   MONGO_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
-jobs: # Define this ONLY ONCE
+jobs:
   unit-testing:
     name: Unit Testing
     runs-on: ubuntu-latest
@@ -20,7 +20,7 @@ jobs: # Define this ONLY ONCE
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup NodeJS Version
+      - name: Setup NodeJS
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -28,28 +28,38 @@ jobs: # Define this ONLY ONCE
       - name: Install Dependencies
         run: npm install
 
-      - name: Unit Testing
+      - name: Run Unit Tests
         run: npm test
 
-      - name: Archive Test Result
-        if: always() # Runs even if tests fail
+      - name: Archive Test Results
+        if: always() 
         uses: actions/upload-artifact@v4
         with:
           name: Mocha-Test-Result
           path: test-results.xml
 
   code-coverage:
-     runs-on: ubuntu-latest
-     steps:
-     - uses: actions/checkout@v4
-     - uses: actions/setup-node@v4
-       with:
-        node-version: 18
-     - run: npm install
-     - continue-on-error: true
-       run: npm run coverage
-     - uses: actions/upload-artifact@v4
-       with:
-        name: Code-Coverage-Result
-        path: coverage
-        retention-days: 5
+    name: Code Coverage
+    runs-on: ubuntu-latest
+    # Optional: needs: unit-testing (uncomment if coverage depends on tests passing)
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Generate Coverage Report
+        run: npm run coverage
+
+      - name: Archive Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Code-Coverage-Result
+          path: coverage
+          retention-days: 5
